@@ -1,9 +1,14 @@
 package com.shivam.journalApp.controller;
 
+import com.shivam.journalApp.api.response.WeatherResponse;
 import com.shivam.journalApp.entity.User;
 import com.shivam.journalApp.service.UserService;
+import com.shivam.journalApp.service.WeatherService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -27,6 +32,9 @@ public class UserController {
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
+    @Autowired
+    private WeatherService weatherService;
+
     @PutMapping("/{userName}")
     public ResponseEntity<?> updateUser(@RequestBody User user, @PathVariable String userName) {
         User userInDb = userService.findByUserName(userName);
@@ -48,4 +56,21 @@ public class UserController {
         }
         return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
     }
+
+
+    @GetMapping("/greeting")
+    public ResponseEntity<?> greeting() {
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+
+        WeatherResponse haryana = weatherService.getWeather("Haryana");
+
+        String greeting = "Hi " + authentication.getName();
+        if (haryana != null && haryana.getCurrent() != null) {
+            greeting += ", weather feels like " + haryana.getCurrent().getFeelslike() + "°C";
+        }
+
+        return new ResponseEntity<>(greeting, HttpStatus.OK);
+    }
+
 }
