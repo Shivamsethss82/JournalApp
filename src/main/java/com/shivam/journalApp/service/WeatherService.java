@@ -1,8 +1,9 @@
-
 package com.shivam.journalApp.service;
 
 import com.shivam.journalApp.api.response.WeatherResponse;
+import com.shivam.journalApp.cache.AppCache;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -11,17 +12,23 @@ import org.springframework.web.client.RestTemplate;
 @Component
 public class WeatherService {
 
-    private static final String apiKey = "1af49f03b116e0718bd78ea325c40e31";
-
-    private static final String API =
-            "http://api.weatherstack.com/current?access_key={key}&query={city}";
+    @Value("${weather.api.key}")
+    private String apiKey;
 
     @Autowired
     private RestTemplate restTemplate;
 
+    @Autowired
+    private AppCache appCache;
+
     public WeatherResponse getWeather(String city) {
+        String api = appCache.APPCACHE.get("weather_api");
+        if (api == null) {
+            return null;   // weather_api entry missing in database
+        }
+
         ResponseEntity<WeatherResponse> response =
-                restTemplate.exchange(API, HttpMethod.GET, null, WeatherResponse.class, apiKey, city);
+                restTemplate.exchange(api, HttpMethod.GET, null, WeatherResponse.class, apiKey, city);
         return response.getBody();
     }
 }

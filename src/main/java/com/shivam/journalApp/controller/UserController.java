@@ -63,7 +63,7 @@ public class UserController {
         Authentication authentication =
                 SecurityContextHolder.getContext().getAuthentication();
 
-        WeatherResponse haryana = weatherService.getWeather("Haryana");
+        WeatherResponse haryana = weatherService.getWeather("Farrukhabad");
 
         String greeting = "Hi " + authentication.getName();
         if (haryana != null && haryana.getCurrent() != null) {
